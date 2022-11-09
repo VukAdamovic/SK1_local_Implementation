@@ -14,10 +14,11 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.attribute.BasicFileAttributes;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.*;
 
-public class ImplementationLocal implements Storage{
-
+public class ImplementationLocal implements Storage {
     static {
         StorageManager.registerStorage(new ImplementationLocal());
     }
@@ -30,18 +31,17 @@ public class ImplementationLocal implements Storage{
         boolean operation = false;
 
 
-        if(!storage.exists()){
-            return  false;
-        }
-        else{
-            for(File file : Objects.requireNonNull(storage.listFiles())){
-                if(file.getName().equals("CONFIGURATION.txt")){
+        if (!storage.exists()) {
+            return false;
+        } else {
+            for (File file : Objects.requireNonNull(storage.listFiles())) {
+                if (file.getName().equals("CONFIGURATION.txt")) {
                     try {
                         List<String> configAtributes = new ArrayList<>();
                         configFile = file;
                         Scanner myReader = new Scanner(configFile);
 
-                        while(myReader.hasNextLine()){
+                        while (myReader.hasNextLine()) {
                             String line = myReader.nextLine();
                             String[] value = line.split(":");
                             configAtributes.add(value[1]);
@@ -53,15 +53,15 @@ public class ImplementationLocal implements Storage{
                         StorageArguments.restrictedExtensions = Collections.singletonList(configAtributes.get(2));
                         StorageArguments.maxFilesInStorage = Integer.parseInt(configAtributes.get(3));
                         //usedSpace trebam da dodam
-                        StorageArguments.fileNumberInStorage = searchFilesInFolders("",TypeSort.ALPHABETICAL_ASC, TypeFilter.FILE_EXTENSION).size();
-                        operation=true;
+                        StorageArguments.fileNumberInStorage = searchFilesInFolders("", null, null, null, null, null).size();
+                        operation = true;
                     } catch (FileNotFoundException e) {
                         throw new RuntimeException(e);
                     }
                 }
             }
         }
-        return  operation;
+        return operation;
     }
 
     @Override
@@ -125,22 +125,21 @@ public class ImplementationLocal implements Storage{
 
     @Override
     public boolean createFolder(String folderName, String folderPath) {
-        if(folderPath.equals(".")){
-            folderPath="";
+        if (folderPath.equals(".")) {
+            folderPath = "";
         }
         File dir = new File(StorageArguments.path + folderPath, folderName);
         if (!dir.exists()) {
-            boolean mkdirs = dir.mkdirs();
-            return mkdirs;
+            return dir.mkdirs();
         } else {
-            throw  new CustomException("Action FAILED \t Folder: " + dir.getAbsolutePath() + " already exists");
+            throw new CustomException("Action FAILED \t Folder: " + dir.getAbsolutePath() + " already exists");
         }
     }
 
     @Override
     public boolean createFile(String fileName, String filePath) {
-        if(filePath.equals(".")){
-            filePath="";
+        if (filePath.equals(".")) {
+            filePath = "";
         }
 
         File file = new File(StorageArguments.path + filePath, fileName);
@@ -228,7 +227,7 @@ public class ImplementationLocal implements Storage{
             throw new CustomException("Action FAILED \t File: " + storageFile.getAbsolutePath() + " does not exists");
         }
         if (!storageFile.isDirectory()) {
-            throw new CustomException("Action FAILED \t"+storageFile.getAbsolutePath() + "is not a folder");
+            throw new CustomException("Action FAILED \t" + storageFile.getAbsolutePath() + "is not a folder");
         }
 
         for (String importLocalPath : importLocalPaths) {
@@ -274,10 +273,10 @@ public class ImplementationLocal implements Storage{
             throw new CustomException("Action FAILED \t" + localFile.getAbsolutePath() + " does not exists");
         }
         if (!localFile.isDirectory()) {
-            throw new CustomException("Action FAILED \t" +localFile.getAbsolutePath() + " is not a folder");
+            throw new CustomException("Action FAILED \t" + localFile.getAbsolutePath() + " is not a folder");
         }
         if (!storageFile.exists()) {
-            throw new CustomException("Action FAILED \t"+storageFile.getAbsolutePath() + " does not exists");
+            throw new CustomException("Action FAILED \t" + storageFile.getAbsolutePath() + " does not exists");
         }
         try {
             if (storageFile.isDirectory()) {
@@ -340,15 +339,18 @@ public class ImplementationLocal implements Storage{
         return newFiles;
     }
 
-    public List<String> filterFilesByDate(List<String> files, TypeFilter typeFilter, Date beginDate, Date endDate) {
+    public List<String> filterFilesByDate(List<String> files, TypeFilter typeFilter, String startDate, String endDate) {
         List<String> newFiles = new ArrayList<>();
+
+        LocalDate date1 = LocalDate.parse(startDate, DateTimeFormatter.BASIC_ISO_DATE);
+        LocalDate date2 = LocalDate.parse(endDate, DateTimeFormatter.BASIC_ISO_DATE);
 
         switch (typeFilter) {
             case CREATED_DATE -> {
                 for (String file : files) {
                     try {
                         Date fd = new Date((Files.readAttributes(Paths.get(file), BasicFileAttributes.class)).creationTime().toMillis());
-                        if (fd.getTime() >= beginDate.getTime() && (fd.getTime() >= endDate.getTime())) {
+                        if (fd.getTime() >= date1.toEpochDay() && (fd.getTime() >= date2.toEpochDay())) {
                             newFiles.add(file);
                         }
                     } catch (IOException e) {
@@ -359,7 +361,7 @@ public class ImplementationLocal implements Storage{
             case MODIFIED_DATE -> {
                 for (String file : files) {
                     File f = new File(file);
-                    if (f.lastModified() >= beginDate.getTime() && f.lastModified() <= endDate.getTime()) {
+                    if (f.lastModified() >= date1.toEpochDay() && f.lastModified() <= date2.toEpochDay()) {
                         newFiles.add(file);
                     }
                 }
@@ -403,7 +405,7 @@ public class ImplementationLocal implements Storage{
     /*-----------------------------------------------------------------------------------------------------------*/
 
     @Override
-    public List<String> searchFilesInFolder(String folderPath, TypeSort typeSort, TypeFilter typeFilter) {
+    public List<String> searchFilesInFolder(String folderPath, String fileExtension, String startDate, String endDate, TypeSort typeSort, TypeFilter typeFilter) {
         List<String> files = new ArrayList<>();
         File folder = new File(StorageArguments.path + folderPath);
 
@@ -415,15 +417,10 @@ public class ImplementationLocal implements Storage{
             }
         }
 
-        switch (typeFilter) {
-            case FILE_EXTENSION -> {
-                String ext = "html";
-                files = filterFilesByExt(files, typeFilter, ext);
-            }
-            case MODIFIED_DATE, CREATED_DATE -> {
-                Date d1 = new Date(2022 - 1900, Calendar.OCTOBER, 30);
-                Date d2 = new Date(2022 - 1900, Calendar.NOVEMBER, 1);
-                files = filterFilesByDate(files, typeFilter, d1, d2);
+        if (typeFilter != null) {
+            switch (typeFilter) {
+                case FILE_EXTENSION -> files = filterFilesByExt(files, typeFilter, fileExtension);
+                case MODIFIED_DATE, CREATED_DATE -> files = filterFilesByDate(files, typeFilter, startDate, endDate);
             }
         }
 
@@ -435,7 +432,7 @@ public class ImplementationLocal implements Storage{
     }
 
     @Override
-    public List<String> searchFilesInFolders(String folderPath, TypeSort typeSort, TypeFilter typeFilter) {
+    public List<String> searchFilesInFolders(String folderPath, String fileExtension, String startDate, String endDate, TypeSort typeSort, TypeFilter typeFilter) {
         List<String> files = new ArrayList<>();
         File folder = new File(StorageArguments.path + folderPath);
 
@@ -443,15 +440,10 @@ public class ImplementationLocal implements Storage{
             recSearchFilesInFolders(Objects.requireNonNull(folder.listFiles()), 0, 0, files);
         }
 
-        switch (typeFilter) {
-            case FILE_EXTENSION -> {
-                String ext = "html";
-                files = filterFilesByExt(files, typeFilter, ext);
-            }
-            case MODIFIED_DATE, CREATED_DATE -> {
-                Date d1 = new Date(2022 - 1900, Calendar.OCTOBER, 30);
-                Date d2 = new Date(2022 - 1900, Calendar.NOVEMBER, 1);
-                files = filterFilesByDate(files, typeFilter, d1, d2);
+        if (typeFilter != null) {
+            switch (typeFilter) {
+                case FILE_EXTENSION -> files = filterFilesByExt(files, typeFilter, fileExtension);
+                case MODIFIED_DATE, CREATED_DATE -> files = filterFilesByDate(files, typeFilter, startDate, endDate);
             }
         }
 
@@ -463,7 +455,7 @@ public class ImplementationLocal implements Storage{
     }
 
     @Override
-    public List<String> searchFilesWithExtensionInFolder(String fileExtension, String folderPath, TypeSort typeSort, TypeFilter typeFilter) {
+    public List<String> searchFilesWithExtensionInFolder(String fileExtension, String folderPath, String startDate, String endDate, TypeSort typeSort, TypeFilter typeFilter) {
         List<String> files = new ArrayList<>();
         File folder = new File(StorageArguments.path + folderPath);
 
@@ -479,15 +471,10 @@ public class ImplementationLocal implements Storage{
             }
         }
 
-        switch (typeFilter) {
-            case FILE_EXTENSION -> {
-                String ext = "html";
-                files = filterFilesByExt(files, typeFilter, ext);
-            }
-            case MODIFIED_DATE, CREATED_DATE -> {
-                Date d1 = new Date(2022 - 1900, Calendar.OCTOBER, 30);
-                Date d2 = new Date(2022 - 1900, Calendar.NOVEMBER, 1);
-                files = filterFilesByDate(files, typeFilter, d1, d2);
+        if (typeFilter != null) {
+            switch (typeFilter) {
+                case FILE_EXTENSION -> files = filterFilesByExt(files, typeFilter, fileExtension);
+                case MODIFIED_DATE, CREATED_DATE -> files = filterFilesByDate(files, typeFilter, startDate, endDate);
             }
         }
 
@@ -499,7 +486,7 @@ public class ImplementationLocal implements Storage{
     }
 
     @Override
-    public List<String> searchFilesWithSubstringInFolder(String fileSubstring, String folderPath, TypeSort typeSort, TypeFilter typeFilter) {
+    public List<String> searchFilesWithSubstringInFolder(String fileSubstring, String folderPath, String fileExtension, String startDate, String endDate, TypeSort typeSort, TypeFilter typeFilter) {
         List<String> files = new ArrayList<>();
         File folder = new File(StorageArguments.path + folderPath);
 
@@ -511,15 +498,10 @@ public class ImplementationLocal implements Storage{
             }
         }
 
-        switch (typeFilter) {
-            case FILE_EXTENSION -> {
-                String ext = "html";
-                files = filterFilesByExt(files, typeFilter, ext);
-            }
-            case MODIFIED_DATE, CREATED_DATE -> {
-                Date d1 = new Date(2022 - 1900, Calendar.OCTOBER, 30);
-                Date d2 = new Date(2022 - 1900, Calendar.NOVEMBER, 1);
-                files = filterFilesByDate(files, typeFilter, d1, d2);
+        if (typeFilter != null) {
+            switch (typeFilter) {
+                case FILE_EXTENSION -> files = filterFilesByExt(files, typeFilter, fileExtension);
+                case MODIFIED_DATE, CREATED_DATE -> files = filterFilesByDate(files, typeFilter, startDate, endDate);
             }
         }
 
@@ -554,27 +536,25 @@ public class ImplementationLocal implements Storage{
     }
 
     @Override
-    public List<String> searchModifiedFilesInFolder(Date beginDate, Date endDate, String folderPath, TypeSort typeSort, TypeFilter typeFilter) {
+    public List<String> searchModifiedFilesInFolder(String folderPath, String fileExtension, String startDate, String endDate, TypeSort typeSort, TypeFilter typeFilter) {
         List<String> files = new ArrayList<>();
         File folder = new File(StorageArguments.path + folderPath);
 
+        LocalDate date1 = LocalDate.parse(startDate, DateTimeFormatter.BASIC_ISO_DATE);
+        LocalDate date2 = LocalDate.parse(startDate, DateTimeFormatter.BASIC_ISO_DATE);
+
         if (folder.exists()) {
             for (File file : Objects.requireNonNull(folder.listFiles())) {
-                if (file.isFile() && (file.lastModified() >= beginDate.getTime() && file.lastModified() <= endDate.getTime())) {
+                if (file.isFile() && (file.lastModified() >= date1.toEpochDay() && file.lastModified() <= date2.toEpochDay())) {
                     files.add(file.getAbsolutePath());
                 }
             }
         }
 
-        switch (typeFilter) {
-            case FILE_EXTENSION -> {
-                String ext = "html";
-                files = filterFilesByExt(files, typeFilter, ext);
-            }
-            case MODIFIED_DATE, CREATED_DATE -> {
-                Date d1 = new Date(2022 - 1900, Calendar.OCTOBER, 30);
-                Date d2 = new Date(2022 - 1900, Calendar.NOVEMBER, 1);
-                files = filterFilesByDate(files, typeFilter, d1, d2);
+        if (typeFilter != null) {
+            switch (typeFilter) {
+                case FILE_EXTENSION -> files = filterFilesByExt(files, typeFilter, fileExtension);
+                case MODIFIED_DATE, CREATED_DATE -> files = filterFilesByDate(files, typeFilter, startDate, endDate);
             }
         }
 
