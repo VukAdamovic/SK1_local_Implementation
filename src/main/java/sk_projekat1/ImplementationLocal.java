@@ -23,7 +23,6 @@ public class ImplementationLocal implements Storage {
         StorageManager.registerStorage(new ImplementationLocal());
     }
 
-    //dovrsi metodu
     @Override
     public boolean setPath(String apsolutePath) {
         File storage = new File(apsolutePath);
@@ -128,7 +127,7 @@ public class ImplementationLocal implements Storage {
         if (folderPath.equals(".")) {
             folderPath = "";
         }
-        File dir = new File(StorageArguments.path + folderPath, folderName);
+        File dir = new File(StorageArguments.path +"/" + folderPath, folderName);
 
         if(!dir.getParentFile().exists()){
             throw new CustomException("Action FAILED \t Folder: " + dir.getParentFile().getAbsolutePath() + " does not exists");
@@ -146,7 +145,7 @@ public class ImplementationLocal implements Storage {
             filePath = "";
         }
 
-        File file = new File(StorageArguments.path + filePath, fileName);
+        File file = new File(StorageArguments.path + "/" + filePath, fileName);
 
         if(!file.getParentFile().exists()){
             throw new CustomException("Action FAILED \t Folder: " + file.getParentFile().getAbsolutePath() + " does not exists");
@@ -185,6 +184,12 @@ public class ImplementationLocal implements Storage {
 
     @Override
     public boolean moveFile(String oldFilePath, String movePath) {
+        if(oldFilePath.equals(".")){
+            throw new CustomException("Action FAILED \t Storage can not be moved");
+        }
+        if(movePath.equals(".")){
+            movePath = "";
+        }
         File targetFile = new File(StorageArguments.path + oldFilePath); // objekat koji zelimo da premestimo
         File targetLocation = Path.of(StorageArguments.path + movePath).toFile(); // ciljana lokacija
 
@@ -208,6 +213,9 @@ public class ImplementationLocal implements Storage {
 
     @Override
     public boolean renameFileObject(String foNewName, String foPath) {
+        if(foPath.equals(".")){
+            foPath="";
+        }
         File fo = new File(StorageArguments.path + foPath);
         if (fo.exists()) {
             File renamedFile = new File(fo.getParentFile().getAbsolutePath(), foNewName);
@@ -219,6 +227,9 @@ public class ImplementationLocal implements Storage {
 
     @Override
     public boolean deleteFileObject(String folderPath) {
+        if(folderPath.equals(".")){
+            throw new CustomException("Action FAILED \t  Storage can not be deleted");
+        }
         File fo = new File(StorageArguments.path + folderPath);
         if (fo.exists()) {
             return fo.delete();
@@ -229,6 +240,10 @@ public class ImplementationLocal implements Storage {
 
     @Override
     public boolean importFileObject(String[] importLocalPaths, String importStoragePath) {
+
+        if(importStoragePath.equals(".")){
+            importStoragePath="";
+        }
         File storageFile = new File(StorageArguments.path + importStoragePath);
 
         if (!storageFile.exists()) {
@@ -274,6 +289,9 @@ public class ImplementationLocal implements Storage {
 
     @Override
     public boolean exportFileObject(String exportStoragePath, String exportLocalPath) {
+        if(exportStoragePath.equals(".")){
+            exportStoragePath = "";
+        }
         File storageFile = new File(StorageArguments.path + exportStoragePath);
         File localFile = new File(exportLocalPath);
 
@@ -414,6 +432,9 @@ public class ImplementationLocal implements Storage {
 
     @Override
     public List<String> searchFilesInFolder(String folderPath, String fileExtension, String startDate, String endDate, TypeSort typeSort, TypeFilter typeFilter) {
+        if(folderPath.equals(".")){
+            folderPath = "";
+        }
         List<String> files = new ArrayList<>();
         File folder = new File(StorageArguments.path + folderPath);
 
@@ -441,6 +462,10 @@ public class ImplementationLocal implements Storage {
 
     @Override
     public List<String> searchFilesInFolders(String folderPath, String fileExtension, String startDate, String endDate, TypeSort typeSort, TypeFilter typeFilter) {
+
+        if(folderPath.equals(".")){
+            folderPath = "";
+        }
         List<String> files = new ArrayList<>();
         File folder = new File(StorageArguments.path + folderPath);
 
@@ -464,6 +489,10 @@ public class ImplementationLocal implements Storage {
 
     @Override
     public List<String> searchFilesWithExtensionInFolder(String fileExtension, String folderPath, String startDate, String endDate, TypeSort typeSort, TypeFilter typeFilter) {
+
+        if(folderPath.equals(".")){
+            folderPath = "";
+        }
         List<String> files = new ArrayList<>();
         File folder = new File(StorageArguments.path + folderPath);
 
@@ -495,6 +524,10 @@ public class ImplementationLocal implements Storage {
 
     @Override
     public List<String> searchFilesWithSubstringInFolder(String fileSubstring, String folderPath, String fileExtension, String startDate, String endDate, TypeSort typeSort, TypeFilter typeFilter) {
+
+        if(folderPath.equals(".")){
+            folderPath = "";
+        }
         List<String> files = new ArrayList<>();
         File folder = new File(StorageArguments.path + folderPath);
 
@@ -522,6 +555,10 @@ public class ImplementationLocal implements Storage {
 
     @Override
     public boolean existsInFolder(String[] fileName, String folderPath) {
+
+        if(folderPath.equals(".")){
+            folderPath = "";
+        }
         File folder = new File(StorageArguments.path + folderPath);
         int checker = 0;
 
@@ -545,6 +582,10 @@ public class ImplementationLocal implements Storage {
 
     @Override
     public List<String> searchModifiedFilesInFolder(String folderPath, String fileExtension, String startDate, String endDate, TypeSort typeSort, TypeFilter typeFilter) {
+
+        if(folderPath.equals(".")){
+            folderPath = "";
+        }
         List<String> files = new ArrayList<>();
         File folder = new File(StorageArguments.path + folderPath);
 
