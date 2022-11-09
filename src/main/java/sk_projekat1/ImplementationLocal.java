@@ -129,6 +129,10 @@ public class ImplementationLocal implements Storage {
             folderPath = "";
         }
         File dir = new File(StorageArguments.path + folderPath, folderName);
+
+        if(!dir.getParentFile().exists()){
+            throw new CustomException("Action FAILED \t Folder: " + dir.getParentFile().getAbsolutePath() + " does not exists");
+        }
         if (!dir.exists()) {
             return dir.mkdirs();
         } else {
@@ -143,6 +147,10 @@ public class ImplementationLocal implements Storage {
         }
 
         File file = new File(StorageArguments.path + filePath, fileName);
+
+        if(!file.getParentFile().exists()){
+            throw new CustomException("Action FAILED \t Folder: " + file.getParentFile().getAbsolutePath() + " does not exists");
+        }
 
         if (!file.exists()) {
             try {
