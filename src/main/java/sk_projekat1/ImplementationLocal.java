@@ -319,33 +319,44 @@ public class ImplementationLocal implements Storage {
 
     public List<String> sortFiles(List<String> files, TypeSort typeSort) {
         switch (typeSort) {
-            case ALPHABETICAL_ASC -> files.sort(String.CASE_INSENSITIVE_ORDER);
-            case ALPHABETICAL_DESC -> files.sort(Collections.reverseOrder());
-            case CREATED_DATE_ASC -> files.sort((o1, o2) -> {
-                long fcd1;
-                long fcd2;
-                try {
-                    fcd1 = (new Date((Files.readAttributes(Paths.get(o1), BasicFileAttributes.class)).creationTime().toMillis())).getTime();
-                    fcd2 = (new Date((Files.readAttributes(Paths.get(o2), BasicFileAttributes.class)).creationTime().toMillis())).getTime();
-                } catch (IOException e) {
-                    throw new RuntimeException(e);
-                }
-                return Long.compare(fcd1, fcd2);
-            });
-            case CREATED_DATE_DESC -> files.sort((o1, o2) -> {
-                long fcd1;
-                long fcd2;
-                try {
-                    fcd1 = (new Date((Files.readAttributes(Paths.get(o1), BasicFileAttributes.class)).creationTime().toMillis())).getTime();
-                    fcd2 = (new Date((Files.readAttributes(Paths.get(o2), BasicFileAttributes.class)).creationTime().toMillis())).getTime();
-                } catch (IOException e) {
-                    throw new RuntimeException(e);
-                }
-                return Long.compare(fcd2, fcd1);
-            });
-            case MODIFIED_DATE_ASC -> files.sort(Comparator.comparingLong(o -> new File(o).lastModified()));
-            case MODIFIED_DATE_DESC ->
-                    files.sort((o1, o2) -> Long.compare(new File(o2).lastModified(), new File(o1).lastModified()));
+            case ALPHABETICAL_ASC: {
+                files.sort(String.CASE_INSENSITIVE_ORDER);
+                break;
+            }
+            case ALPHABETICAL_DESC: {
+                files.sort(Collections.reverseOrder());
+                break;
+            }
+            case CREATED_DATE_ASC: {
+                files.sort((o1, o2) -> {
+                    long fcd1;
+                    long fcd2;
+                    try {
+                        fcd1 = (new Date((Files.readAttributes(Paths.get(o1), BasicFileAttributes.class)).creationTime().toMillis())).getTime();
+                        fcd2 = (new Date((Files.readAttributes(Paths.get(o2), BasicFileAttributes.class)).creationTime().toMillis())).getTime();
+                    } catch (IOException e) {
+                        throw new RuntimeException(e);
+                    }
+                    return Long.compare(fcd1, fcd2);
+                });
+            }
+            case CREATED_DATE_DESC: {
+                files.sort((o1, o2) -> {
+                    long fcd1;
+                    long fcd2;
+                    try {
+                        fcd1 = (new Date((Files.readAttributes(Paths.get(o1), BasicFileAttributes.class)).creationTime().toMillis())).getTime();
+                        fcd2 = (new Date((Files.readAttributes(Paths.get(o2), BasicFileAttributes.class)).creationTime().toMillis())).getTime();
+                    } catch (IOException e) {
+                        throw new RuntimeException(e);
+                    }
+                    return Long.compare(fcd2, fcd1);
+                });
+            }
+            case MODIFIED_DATE_ASC:
+                files.sort(Comparator.comparingLong(o -> new File(o).lastModified()));
+            case MODIFIED_DATE_DESC:
+                files.sort((o1, o2) -> Long.compare(new File(o2).lastModified(), new File(o1).lastModified()));
         }
         return files;
     }
@@ -371,7 +382,7 @@ public class ImplementationLocal implements Storage {
         LocalDate date2 = LocalDate.parse(endDate, DateTimeFormatter.BASIC_ISO_DATE);
 
         switch (typeFilter) {
-            case CREATED_DATE -> {
+            case CREATED_DATE: {
                 for (String file : files) {
                     try {
                         Date fd = new Date((Files.readAttributes(Paths.get(file), BasicFileAttributes.class)).creationTime().toMillis());
@@ -383,7 +394,7 @@ public class ImplementationLocal implements Storage {
                     }
                 }
             }
-            case MODIFIED_DATE -> {
+            case MODIFIED_DATE: {
                 for (String file : files) {
                     File f = new File(file);
                     if (f.lastModified() >= date1.toEpochDay() && f.lastModified() <= date2.toEpochDay()) {
@@ -447,18 +458,51 @@ public class ImplementationLocal implements Storage {
         }
 
         switch (typeFilter) {
-            case "FILE_EXTENSION" -> files = filterFilesByExt(files, TypeFilter.FILE_EXTENSION, fileExtension);
-            case "MODIFIED_DATE" -> files = filterFilesByDate(files, TypeFilter.MODIFIED_DATE, startDate, endDate);
-            case "CREATED_DATE" -> files = filterFilesByDate(files, TypeFilter.CREATED_DATE, startDate, endDate);
+            case "FILE_EXTENSION": {
+                files = filterFilesByExt(files, TypeFilter.FILE_EXTENSION, fileExtension);
+                break;
+            }
+            case "MODIFIED_DATE": {
+                files = filterFilesByDate(files, TypeFilter.MODIFIED_DATE, startDate, endDate);
+                break;
+            }
+            case "CREATED_DATE": {
+                files = filterFilesByDate(files, TypeFilter.CREATED_DATE, startDate, endDate);
+                break;
+            }
+            default: {
+                break;
+            }
         }
 
         switch (typeSort) {
-            case "ALPHABETICAL_ASC" -> files = sortFiles(files, TypeSort.ALPHABETICAL_ASC);
-            case "ALPHABETICAL_DESC" -> files = sortFiles(files, TypeSort.ALPHABETICAL_DESC);
-            case "CREATED_DATE_ASC" -> files = sortFiles(files, TypeSort.CREATED_DATE_ASC);
-            case "CREATED_DATE_DESC" -> files = sortFiles(files, TypeSort.CREATED_DATE_DESC);
-            case "MODIFIED_DATE_ASC" -> files = sortFiles(files, TypeSort.MODIFIED_DATE_ASC);
-            case "MODIFIED_DATE_DESC" -> files = sortFiles(files, TypeSort.MODIFIED_DATE_DESC);
+            case "ALPHABETICAL_ASC": {
+                files = sortFiles(files, TypeSort.ALPHABETICAL_ASC);
+                break;
+            }
+            case "ALPHABETICAL_DESC": {
+                files = sortFiles(files, TypeSort.ALPHABETICAL_DESC);
+                break;
+            }
+            case "CREATED_DATE_ASC": {
+                files = sortFiles(files, TypeSort.CREATED_DATE_ASC);
+                break;
+            }
+            case "CREATED_DATE_DESC": {
+                files = sortFiles(files, TypeSort.CREATED_DATE_DESC);
+                break;
+            }
+            case "MODIFIED_DATE_ASC": {
+                files = sortFiles(files, TypeSort.MODIFIED_DATE_ASC);
+                break;
+            }
+            case "MODIFIED_DATE_DESC": {
+                files = sortFiles(files, TypeSort.MODIFIED_DATE_DESC);
+                break;
+            }
+            default: {
+                break;
+            }
         }
 
         return files;
@@ -478,18 +522,51 @@ public class ImplementationLocal implements Storage {
         }
 
         switch (typeFilter) {
-            case "FILE_EXTENSION" -> files = filterFilesByExt(files, TypeFilter.FILE_EXTENSION, fileExtension);
-            case "MODIFIED_DATE" -> files = filterFilesByDate(files, TypeFilter.MODIFIED_DATE, startDate, endDate);
-            case "CREATED_DATE" -> files = filterFilesByDate(files, TypeFilter.CREATED_DATE, startDate, endDate);
+            case "FILE_EXTENSION": {
+                files = filterFilesByExt(files, TypeFilter.FILE_EXTENSION, fileExtension);
+                break;
+            }
+            case "MODIFIED_DATE": {
+                files = filterFilesByDate(files, TypeFilter.MODIFIED_DATE, startDate, endDate);
+                break;
+            }
+            case "CREATED_DATE": {
+                files = filterFilesByDate(files, TypeFilter.CREATED_DATE, startDate, endDate);
+                break;
+            }
+            default: {
+                break;
+            }
         }
 
         switch (typeSort) {
-            case "ALPHABETICAL_ASC" -> files = sortFiles(files, TypeSort.ALPHABETICAL_ASC);
-            case "ALPHABETICAL_DESC" -> files = sortFiles(files, TypeSort.ALPHABETICAL_DESC);
-            case "CREATED_DATE_ASC" -> files = sortFiles(files, TypeSort.CREATED_DATE_ASC);
-            case "CREATED_DATE_DESC" -> files = sortFiles(files, TypeSort.CREATED_DATE_DESC);
-            case "MODIFIED_DATE_ASC" -> files = sortFiles(files, TypeSort.MODIFIED_DATE_ASC);
-            case "MODIFIED_DATE_DESC" -> files = sortFiles(files, TypeSort.MODIFIED_DATE_DESC);
+            case "ALPHABETICAL_ASC": {
+                files = sortFiles(files, TypeSort.ALPHABETICAL_ASC);
+                break;
+            }
+            case "ALPHABETICAL_DESC": {
+                files = sortFiles(files, TypeSort.ALPHABETICAL_DESC);
+                break;
+            }
+            case "CREATED_DATE_ASC": {
+                files = sortFiles(files, TypeSort.CREATED_DATE_ASC);
+                break;
+            }
+            case "CREATED_DATE_DESC": {
+                files = sortFiles(files, TypeSort.CREATED_DATE_DESC);
+                break;
+            }
+            case "MODIFIED_DATE_ASC": {
+                files = sortFiles(files, TypeSort.MODIFIED_DATE_ASC);
+                break;
+            }
+            case "MODIFIED_DATE_DESC": {
+                files = sortFiles(files, TypeSort.MODIFIED_DATE_DESC);
+                break;
+            }
+            default: {
+                break;
+            }
         }
 
         return files;
@@ -517,18 +594,51 @@ public class ImplementationLocal implements Storage {
         }
 
         switch (typeFilter) {
-            case "FILE_EXTENSION" -> files = filterFilesByExt(files, TypeFilter.FILE_EXTENSION, fileExtension);
-            case "MODIFIED_DATE" -> files = filterFilesByDate(files, TypeFilter.MODIFIED_DATE, startDate, endDate);
-            case "CREATED_DATE" -> files = filterFilesByDate(files, TypeFilter.CREATED_DATE, startDate, endDate);
+            case "FILE_EXTENSION": {
+                files = filterFilesByExt(files, TypeFilter.FILE_EXTENSION, fileExtension);
+                break;
+            }
+            case "MODIFIED_DATE": {
+                files = filterFilesByDate(files, TypeFilter.MODIFIED_DATE, startDate, endDate);
+                break;
+            }
+            case "CREATED_DATE": {
+                files = filterFilesByDate(files, TypeFilter.CREATED_DATE, startDate, endDate);
+                break;
+            }
+            default: {
+                break;
+            }
         }
 
         switch (typeSort) {
-            case "ALPHABETICAL_ASC" -> files = sortFiles(files, TypeSort.ALPHABETICAL_ASC);
-            case "ALPHABETICAL_DESC" -> files = sortFiles(files, TypeSort.ALPHABETICAL_DESC);
-            case "CREATED_DATE_ASC" -> files = sortFiles(files, TypeSort.CREATED_DATE_ASC);
-            case "CREATED_DATE_DESC" -> files = sortFiles(files, TypeSort.CREATED_DATE_DESC);
-            case "MODIFIED_DATE_ASC" -> files = sortFiles(files, TypeSort.MODIFIED_DATE_ASC);
-            case "MODIFIED_DATE_DESC" -> files = sortFiles(files, TypeSort.MODIFIED_DATE_DESC);
+            case "ALPHABETICAL_ASC": {
+                files = sortFiles(files, TypeSort.ALPHABETICAL_ASC);
+                break;
+            }
+            case "ALPHABETICAL_DESC": {
+                files = sortFiles(files, TypeSort.ALPHABETICAL_DESC);
+                break;
+            }
+            case "CREATED_DATE_ASC": {
+                files = sortFiles(files, TypeSort.CREATED_DATE_ASC);
+                break;
+            }
+            case "CREATED_DATE_DESC": {
+                files = sortFiles(files, TypeSort.CREATED_DATE_DESC);
+                break;
+            }
+            case "MODIFIED_DATE_ASC": {
+                files = sortFiles(files, TypeSort.MODIFIED_DATE_ASC);
+                break;
+            }
+            case "MODIFIED_DATE_DESC": {
+                files = sortFiles(files, TypeSort.MODIFIED_DATE_DESC);
+                break;
+            }
+            default: {
+                break;
+            }
         }
 
         return files;
@@ -552,18 +662,51 @@ public class ImplementationLocal implements Storage {
         }
 
         switch (typeFilter) {
-            case "FILE_EXTENSION" -> files = filterFilesByExt(files, TypeFilter.FILE_EXTENSION, fileExtension);
-            case "MODIFIED_DATE" -> files = filterFilesByDate(files, TypeFilter.MODIFIED_DATE, startDate, endDate);
-            case "CREATED_DATE" -> files = filterFilesByDate(files, TypeFilter.CREATED_DATE, startDate, endDate);
+            case "FILE_EXTENSION": {
+                files = filterFilesByExt(files, TypeFilter.FILE_EXTENSION, fileExtension);
+                break;
+            }
+            case "MODIFIED_DATE": {
+                files = filterFilesByDate(files, TypeFilter.MODIFIED_DATE, startDate, endDate);
+                break;
+            }
+            case "CREATED_DATE": {
+                files = filterFilesByDate(files, TypeFilter.CREATED_DATE, startDate, endDate);
+                break;
+            }
+            default: {
+                break;
+            }
         }
 
         switch (typeSort) {
-            case "ALPHABETICAL_ASC" -> files = sortFiles(files, TypeSort.ALPHABETICAL_ASC);
-            case "ALPHABETICAL_DESC" -> files = sortFiles(files, TypeSort.ALPHABETICAL_DESC);
-            case "CREATED_DATE_ASC" -> files = sortFiles(files, TypeSort.CREATED_DATE_ASC);
-            case "CREATED_DATE_DESC" -> files = sortFiles(files, TypeSort.CREATED_DATE_DESC);
-            case "MODIFIED_DATE_ASC" -> files = sortFiles(files, TypeSort.MODIFIED_DATE_ASC);
-            case "MODIFIED_DATE_DESC" -> files = sortFiles(files, TypeSort.MODIFIED_DATE_DESC);
+            case "ALPHABETICAL_ASC": {
+                files = sortFiles(files, TypeSort.ALPHABETICAL_ASC);
+                break;
+            }
+            case "ALPHABETICAL_DESC": {
+                files = sortFiles(files, TypeSort.ALPHABETICAL_DESC);
+                break;
+            }
+            case "CREATED_DATE_ASC": {
+                files = sortFiles(files, TypeSort.CREATED_DATE_ASC);
+                break;
+            }
+            case "CREATED_DATE_DESC": {
+                files = sortFiles(files, TypeSort.CREATED_DATE_DESC);
+                break;
+            }
+            case "MODIFIED_DATE_ASC": {
+                files = sortFiles(files, TypeSort.MODIFIED_DATE_ASC);
+                break;
+            }
+            case "MODIFIED_DATE_DESC": {
+                files = sortFiles(files, TypeSort.MODIFIED_DATE_DESC);
+                break;
+            }
+            default: {
+                break;
+            }
         }
 
         return files;
@@ -617,18 +760,51 @@ public class ImplementationLocal implements Storage {
         }
 
         switch (typeFilter) {
-            case "FILE_EXTENSION" -> files = filterFilesByExt(files, TypeFilter.FILE_EXTENSION, fileExtension);
-            case "MODIFIED_DATE" -> files = filterFilesByDate(files, TypeFilter.MODIFIED_DATE, startDate, endDate);
-            case "CREATED_DATE" -> files = filterFilesByDate(files, TypeFilter.CREATED_DATE, startDate, endDate);
+            case "FILE_EXTENSION": {
+                files = filterFilesByExt(files, TypeFilter.FILE_EXTENSION, fileExtension);
+                break;
+            }
+            case "MODIFIED_DATE": {
+                files = filterFilesByDate(files, TypeFilter.MODIFIED_DATE, startDate, endDate);
+                break;
+            }
+            case "CREATED_DATE": {
+                files = filterFilesByDate(files, TypeFilter.CREATED_DATE, startDate, endDate);
+                break;
+            }
+            default: {
+                break;
+            }
         }
 
         switch (typeSort) {
-            case "ALPHABETICAL_ASC" -> files = sortFiles(files, TypeSort.ALPHABETICAL_ASC);
-            case "ALPHABETICAL_DESC" -> files = sortFiles(files, TypeSort.ALPHABETICAL_DESC);
-            case "CREATED_DATE_ASC" -> files = sortFiles(files, TypeSort.CREATED_DATE_ASC);
-            case "CREATED_DATE_DESC" -> files = sortFiles(files, TypeSort.CREATED_DATE_DESC);
-            case "MODIFIED_DATE_ASC" -> files = sortFiles(files, TypeSort.MODIFIED_DATE_ASC);
-            case "MODIFIED_DATE_DESC" -> files = sortFiles(files, TypeSort.MODIFIED_DATE_DESC);
+            case "ALPHABETICAL_ASC": {
+                files = sortFiles(files, TypeSort.ALPHABETICAL_ASC);
+                break;
+            }
+            case "ALPHABETICAL_DESC": {
+                files = sortFiles(files, TypeSort.ALPHABETICAL_DESC);
+                break;
+            }
+            case "CREATED_DATE_ASC": {
+                files = sortFiles(files, TypeSort.CREATED_DATE_ASC);
+                break;
+            }
+            case "CREATED_DATE_DESC": {
+                files = sortFiles(files, TypeSort.CREATED_DATE_DESC);
+                break;
+            }
+            case "MODIFIED_DATE_ASC": {
+                files = sortFiles(files, TypeSort.MODIFIED_DATE_ASC);
+                break;
+            }
+            case "MODIFIED_DATE_DESC": {
+                files = sortFiles(files, TypeSort.MODIFIED_DATE_DESC);
+                break;
+            }
+            default: {
+                break;
+            }
         }
 
         return files;
