@@ -505,6 +505,13 @@ public class ImplementationLocal implements Storage {
             }
         }
 
+        for (String file : files) {
+            File fileInstance = new File(file);
+            file = "FILE NAME: " + fileInstance.getName() + "\n" +
+                    "FILE ABSOLUTE PATH: " + fileInstance.getAbsolutePath() + "\n" +
+                    "FILE MODIFICATION TIME: " + fileInstance.lastModified() + "\n";
+        }
+
         return files;
     }
 
@@ -567,6 +574,13 @@ public class ImplementationLocal implements Storage {
             default: {
                 break;
             }
+        }
+
+        for (String file : files) {
+            File fileInstance = new File(file);
+            file = "FILE NAME: " + fileInstance.getName() + "\n" +
+                    "FILE ABSOLUTE PATH: " + fileInstance.getAbsolutePath() + "\n" +
+                    "FILE MODIFICATION TIME: " + fileInstance.lastModified() + "\n";
         }
 
         return files;
@@ -641,6 +655,13 @@ public class ImplementationLocal implements Storage {
             }
         }
 
+        for (String file : files) {
+            File fileInstance = new File(file);
+            file = "FILE NAME: " + fileInstance.getName() + "\n" +
+                    "FILE ABSOLUTE PATH: " + fileInstance.getAbsolutePath() + "\n" +
+                    "FILE MODIFICATION TIME: " + fileInstance.lastModified() + "\n";
+        }
+
         return files;
     }
 
@@ -707,6 +728,13 @@ public class ImplementationLocal implements Storage {
             default: {
                 break;
             }
+        }
+
+        for (String file : files) {
+            File fileInstance = new File(file);
+            file = "FILE NAME: " + fileInstance.getName() + "\n" +
+                    "FILE ABSOLUTE PATH: " + fileInstance.getAbsolutePath() + "\n" +
+                    "FILE MODIFICATION TIME: " + fileInstance.lastModified() + "\n";
         }
 
         return files;
@@ -805,6 +833,13 @@ public class ImplementationLocal implements Storage {
             default: {
                 break;
             }
+        }
+
+        for (String file : files) {
+            File fileInstance = new File(file);
+            file = "FILE NAME: " + fileInstance.getName() + "\n" +
+                    "FILE ABSOLUTE PATH: " + fileInstance.getAbsolutePath() + "\n" +
+                    "FILE MODIFICATION TIME: " + fileInstance.lastModified() + "\n";
         }
 
         return files;
