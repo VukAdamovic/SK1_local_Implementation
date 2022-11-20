@@ -14,6 +14,8 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.attribute.BasicFileAttributes;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
@@ -378,15 +380,21 @@ public class ImplementationLocal implements Storage {
     public List<String> filterFilesByDate(List<String> files, TypeFilter typeFilter, String startDate, String endDate) {
         List<String> newFiles = new ArrayList<>();
 
-        LocalDate date1 = LocalDate.parse(startDate, DateTimeFormatter.BASIC_ISO_DATE);
-        LocalDate date2 = LocalDate.parse(endDate, DateTimeFormatter.BASIC_ISO_DATE);
+        SimpleDateFormat dateFormatter = new SimpleDateFormat("yyyy-MM-dd");
+        Date startUsableDate, endUsableDate;
+        try {
+            startUsableDate = dateFormatter.parse(startDate);
+            endUsableDate = dateFormatter.parse(endDate);
+        } catch (ParseException e) {
+            throw new RuntimeException(e);
+        }
 
         switch (typeFilter) {
             case CREATED_DATE: {
                 for (String file : files) {
                     try {
                         Date fd = new Date((Files.readAttributes(Paths.get(file), BasicFileAttributes.class)).creationTime().toMillis());
-                        if (fd.getTime() >= date1.toEpochDay() && (fd.getTime() >= date2.toEpochDay())) {
+                        if (fd.getTime() >= startUsableDate.getTime() && (fd.getTime() >= endUsableDate.getTime())) {
                             newFiles.add(file);
                         }
                     } catch (IOException e) {
@@ -397,7 +405,7 @@ public class ImplementationLocal implements Storage {
             case MODIFIED_DATE: {
                 for (String file : files) {
                     File f = new File(file);
-                    if (f.lastModified() >= date1.toEpochDay() && f.lastModified() <= date2.toEpochDay()) {
+                    if (f.lastModified() >= startUsableDate.getTime() && f.lastModified() <= endUsableDate.getTime()) {
                         newFiles.add(file);
                     }
                 }
@@ -776,12 +784,18 @@ public class ImplementationLocal implements Storage {
         List<String> files = new ArrayList<>();
         File folder = new File(StorageArguments.path + folderPath);
 
-        LocalDate date1 = LocalDate.parse(startDate, DateTimeFormatter.BASIC_ISO_DATE);
-        LocalDate date2 = LocalDate.parse(startDate, DateTimeFormatter.BASIC_ISO_DATE);
+        SimpleDateFormat dateFormatter = new SimpleDateFormat("yyyy-MM-dd");
+        Date startUsableDate, endUsableDate;
+        try {
+            startUsableDate = dateFormatter.parse(startDate);
+            endUsableDate = dateFormatter.parse(endDate);
+        } catch (ParseException e) {
+            throw new RuntimeException(e);
+        }
 
         if (folder.exists()) {
             for (File file : Objects.requireNonNull(folder.listFiles())) {
-                if (file.isFile() && (file.lastModified() >= date1.toEpochDay() && file.lastModified() <= date2.toEpochDay())) {
+                if (file.isFile() && (file.lastModified() >= startUsableDate.getTime() && file.lastModified() <= endUsableDate.getTime())) {
                     files.add(file.getAbsolutePath());
                 }
             }
