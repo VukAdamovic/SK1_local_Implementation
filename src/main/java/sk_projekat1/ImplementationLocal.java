@@ -128,6 +128,9 @@ public class ImplementationLocal implements Storage {
         }
         File dir = new File(StorageArguments.path + "/" + folderPath, folderName);
 
+        if (dir.getParentFile().isFile()) {
+            throw new CustomException("Action FAILED \t " + dir.getParentFile().getAbsolutePath() + " is not a folder");
+        }
         if (!dir.getParentFile().exists()) {
             throw new CustomException("Action FAILED \t Folder: " + dir.getParentFile().getAbsolutePath() + " does not exists");
         }
